@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Firebase Contact App</title>
+
     <!-- Font Awesome Icons -->
     <link
       rel="stylesheet"
@@ -153,6 +155,7 @@
       .edit-icon {
         color: #5b5fc7;
       }
+
       .delete-icon {
         color: #e74c3c;
       }
@@ -233,6 +236,7 @@
       }
     </style>
   </head>
+
   <body>
     <div class="app-container">
       <!-- Header Section -->
@@ -241,28 +245,29 @@
           <i class="fa-solid fa-address-book"></i>
           <h1>Firebase Contact App</h1>
         </div>
+
+        <!-- Search UI abhi sirf show ho rahi hai.
+             Search functionality intentionally nahi banayi gayi. -->
         <div class="search-bar">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Search Contact..."
-            onkeyup="filterContacts()"
-          />
+
+          <input type="text" id="searchInput" placeholder="Search Contact..." />
         </div>
       </header>
 
       <!-- Action Bar -->
       <div class="action-bar">
         <h2>Contacts</h2>
+
         <button class="add-btn" onclick="openModal()">
-          <i class="fa-solid fa-plus"></i> Add Contact
+          <i class="fa-solid fa-plus"></i>
+          Add Contact
         </button>
       </div>
 
       <!-- Contact List Container -->
       <div class="contact-list" id="contactList">
-        <!-- Dynamic Contacts Will Appear Here -->
+        <!-- Firebase se contacts yahan show honge -->
       </div>
     </div>
 
@@ -271,12 +276,17 @@
       <div class="modal">
         <div class="modal-header">
           <h3 id="modalTitle">Add New Contact</h3>
-          <span class="close-btn" onclick="closeModal()">&times;</span>
+
+          <span class="close-btn" onclick="closeModal()"> &times; </span>
         </div>
+
         <form id="contactForm" onsubmit="handleFormSubmit(event)">
-          <input type="hidden" id="contactId" />
+          <!-- Firebase UID yahan temporarily store hogi -->
+          <input type="hidden" id="contactUid" />
+
           <div class="form-group">
-            <label for="name">Name</label>
+            <label for="name"> Name </label>
+
             <input
               type="text"
               id="name"
@@ -284,8 +294,10 @@
               placeholder="Enter full name"
             />
           </div>
+
           <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email"> Email </label>
+
             <input
               type="email"
               id="email"
@@ -293,8 +305,10 @@
               placeholder="Enter email address"
             />
           </div>
+
           <div class="form-group">
-            <label for="phone">Phone</label>
+            <label for="phone"> Phone </label>
+
             <input
               type="tel"
               id="phone"
@@ -302,132 +316,23 @@
               placeholder="Enter phone number"
             />
           </div>
+
           <div class="modal-actions">
             <button type="button" class="btn-cancel" onclick="closeModal()">
               Cancel
             </button>
+
             <button type="submit" class="btn-save">Save Contact</button>
           </div>
         </form>
       </div>
     </div>
 
-    <script>
-      let contacts = [
-        {
-          id: "1",
-          name: "Ali Khan",
-          email: "ali@example.com",
-          phone: "+92 300 1234567",
-        },
-        {
-          id: "2",
-          name: "Sara Ahmed",
-          email: "sara@example.com",
-          phone: "+92 321 7654321",
-        },
-      ];
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
 
-      const contactList = document.getElementById("contactList");
-      const contactModal = document.getElementById("contactModal");
-      const contactForm = document.getElementById("contactForm");
+    <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-database-compat.js"></script>
 
-      // Render Contacts
-      function renderContacts(data = contacts) {
-        contactList.innerHTML = "";
-        if (data.length === 0) {
-          contactList.innerHTML =
-            '<p style="text-align:center; color:#888; padding:20px;">No contacts found.</p>';
-          return;
-        }
-
-        data.forEach((contact) => {
-          const card = document.createElement("div");
-          card.className = "contact-card";
-          card.innerHTML = `
-                    <div class="contact-info">
-                        <h4>${contact.name}</h4>
-                        <p><i class="fa-solid fa-envelope"></i> ${contact.email}</p>
-                        <p><i class="fa-solid fa-phone"></i> ${contact.phone}</p>
-                    </div>
-                    <div class="contact-actions">
-                        <button class="action-icon edit-icon" onclick="editContact('${contact.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button class="action-icon delete-icon" onclick="deleteContact('${contact.id}')"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-          contactList.appendChild(card);
-        });
-      }
-
-      // Open/Close Modal
-      function openModal(editMode = false) {
-        document.getElementById("modalTitle").innerText = editMode
-          ? "Edit Contact"
-          : "Add New Contact";
-        contactModal.style.display = "flex";
-      }
-
-      function closeModal() {
-        contactModal.style.display = "none";
-        contactForm.reset();
-        document.getElementById("contactId").value = "";
-      }
-
-      // Add/Update Contact
-      function handleFormSubmit(e) {
-        e.preventDefault();
-        const id = document.getElementById("contactId").value;
-        const name = document.getElementById("name").value;
-        const email = document.getElementById("email").value;
-        const phone = document.getElementById("phone").value;
-
-        if (id) {
-          contacts = contacts.map((c) =>
-            c.id === id ? { id, name, email, phone } : c,
-          );
-        } else {
-          contacts.push({ id: Date.now().toString(), name, email, phone });
-        }
-
-        renderContacts();
-        closeModal();
-      }
-
-      // Edit Contact
-      function editContact(id) {
-        const contact = contacts.find((c) => c.id === id);
-        if (!contact) return;
-
-        document.getElementById("contactId").value = contact.id;
-        document.getElementById("name").value = contact.name;
-        document.getElementById("email").value = contact.email;
-        document.getElementById("phone").value = contact.phone;
-
-        openModal(true);
-      }
-
-      // Delete Contact
-      function deleteContact(id) {
-        contacts = contacts.filter((c) => c.id !== id);
-        renderContacts();
-      }
-
-      // Filter Search
-      function filterContacts() {
-        const query = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-        const filtered = contacts.filter(
-          (c) =>
-            c.name.toLowerCase().includes(query) ||
-            c.email.toLowerCase().includes(query) ||
-            c.phone.includes(query),
-        );
-        renderContacts(filtered);
-      }
-
-      // Initial Render
-      renderContacts();
-    </script>
+    <script src="./script.js"></script>
   </body>
 </html>
